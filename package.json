@@ -1,0 +1,36 @@
+{
+  "name": "imageeditor",
+  "description": "",
+  "version": "1.0.0",
+  "author": "abitofdev",
+  "license": "ISC",
+  "scripts": {
+    "start": "webpack-dev-server --env.mode development",
+    "build:prod": "webpack --env.mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abitofdev/imageeditor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abitofdev/imageeditor/issues"
+  },
+  "homepage": "https://github.com/abitofdev/imageeditor#readme",
+  "dependencies": {
+    "@webcomponents/webcomponentsjs": "^2.4.4",
+    "lit-element": "^2.3.1",
+    "rxjs": "^6.6.2"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^6.0.3",
+    "html-webpack-plugin": "^4.3.0",
+    "terser-webpack-plugin": "^4.1.0",
+    "ts-loader": "^8.0.2",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0",
+    "worker-loader": "^3.0.1"
+  }
+}

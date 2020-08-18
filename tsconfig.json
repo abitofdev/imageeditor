@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ES2020",
+        "moduleResolution": "Node",
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "lib": [
+            "webworker",
+            "ESNext",
+            "DOM"
+        ],
+        "outDir": "./dist",
+        "strict": true
+    }
+}
