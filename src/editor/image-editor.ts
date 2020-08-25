@@ -3,6 +3,8 @@ import { fromEvent } from 'rxjs';
 import { takeUntil, map, filter } from 'rxjs/operators';
 import { IDisposable } from './shared/disposable.interace';
 import { Grayscale } from './plugins/effects/grayscale';
+import { EffectContext } from './plugins/effects/effect-context.interface';
+import { Sobel } from './plugins/effects/sobel/sobel';
 
 const defaultImageEditorConstructorOptions: IImageEditorConstructorOptions = {
     alpha: false
@@ -44,16 +46,20 @@ export class ImageEditor implements IDisposable {
     }
 
     public grayscale() {
-        const imageData = this._renderingContext?.getImageData(
-            0,
-            0,
-            this._canvasElement.width,
-            this._canvasElement.height
-        ) as ImageData;
+        const imgWidth = this._canvasElement.width;
+        const imgHeight = this._canvasElement.height;
+
+        const imageData = this._renderingContext?.getImageData(0, 0, imgWidth, imgHeight) as ImageData;
         const pixelData = imageData.data;
         console.log(pixelData.length);
 
-        new Grayscale().manipulate(pixelData);
+        const effectContext: EffectContext = {
+            width: imgWidth,
+            height: imgHeight
+        };
+
+        // new Grayscale(effectContext).manipulate(pixelData);
+        new Sobel(effectContext).manipulate(pixelData);
 
         this._renderingContext?.putImageData(imageData, 0, 0);
     }

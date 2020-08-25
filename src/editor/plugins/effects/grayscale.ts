@@ -1,6 +1,6 @@
-import { Effect } from './effect.interface';
+import { Effect } from './effect';
 
-export class Grayscale implements Effect {
+export class Grayscale extends Effect {
     public manipulate(pixelData: Uint8ClampedArray): void {
         const length = pixelData.length;
 
