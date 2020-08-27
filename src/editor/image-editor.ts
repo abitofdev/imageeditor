@@ -2,7 +2,7 @@ import { IImageEditorConstructorOptions } from './image-editor-constructor-optio
 import { fromEvent } from 'rxjs';
 import { takeUntil, map, filter } from 'rxjs/operators';
 import { IDisposable } from './shared/disposable.interace';
-import { Grayscale } from './plugins/effects/grayscale';
+import { Grayscale } from './plugins/effects/grayscale/grayscale';
 import { EffectContext } from './plugins/effects/effect-context.interface';
 import { Sobel } from './plugins/effects/sobel/sobel';
 
@@ -55,10 +55,10 @@ export class ImageEditor implements IDisposable {
 
         const effectContext: EffectContext = {
             width: imgWidth,
-            height: imgHeight
+            height: imgHeight,
         };
 
-        // new Grayscale(effectContext).manipulate(pixelData);
+        new Grayscale(effectContext, 'linear').manipulate(pixelData);
         new Sobel(effectContext).manipulate(pixelData);
 
         this._renderingContext?.putImageData(imageData, 0, 0);

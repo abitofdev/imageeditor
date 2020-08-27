@@ -1,68 +1,56 @@
 import { Effect } from '../effect';
-import { SobelKernals } from './sobel-kernals';
+import { EffectContext } from '../effect-context.interface';
 
 export class Sobel extends Effect {
+    /**
+     * The horizontal Sobel convolution kernel
+     */
+    public static readonly Kx = [-1, 0, +1, -2, 0, +2, -1, 0, +1];
+
+    /**
+     * The vertical Sobel convolution kernel
+     */
+    public static readonly Ky = [-1, -2, -1, 0, 0, 0, +1, +2, +1];
+
+    private readonly _threshold: number;
+
+    constructor(context: EffectContext, threshold: number = 0) {
+        super(context);
+        this._threshold = this.scaleToRange(threshold, 0, 100, 0, 255);
+    }
+
     public manipulate(pixelData: Uint8ClampedArray): void {
-        let index = 0;
+        const width = this.context.width;
+        const height = this.context.height;
+        const originalPixelData = pixelData.slice(0);
 
-        for (let y = 0; y < this.context.height; y++) {
-            for (let x = 0; x < this.context.width; x++) {
-                var r = this.pixel(pixelData, x, y, 0);
-                var g = this.pixel(pixelData, x, y, 1);
-                var b = this.pixel(pixelData, x, y, 2);
+        let i = 0;
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                let cx = 0;
+                let cy = 0;
+                let j = 0;
+                for (let yk = y - 1; yk <= y + 1; yk++) {
+                    for (let xk = x - 1; xk <= x + 1; xk++) {
+                        let i = (yk * width + xk) << 2;
+                        cx += originalPixelData[i] * Sobel.Kx[j];
+                        cy += originalPixelData[i] * Sobel.Ky[j];
+                        j++;
+                    }
+                }
+                let mag = Math.hypot(cx, cy);
+                mag = mag > this._threshold ? mag : 0;
 
-                var avg = (r + g + b) / 3;
-                pixelData[index] = avg;
-                pixelData[index + 1] = avg;
-                pixelData[index + 2] = avg;
-                pixelData[index + 3] = 255;
-
-                index += 4;
+                pixelData[i + 0] = mag;
+                pixelData[i + 1] = mag;
+                pixelData[i + 2] = mag;
+                pixelData[i + 3] = 255;
+                i += 4;
             }
         }
+    }
 
-        index = 0;
-
-        for (let y = 0; y < this.context.height; y++) {
-            for (let x = 0; x < this.context.width; x++) {
-                // for (let c = 0; c <= 3; c++) {
-                //     if (c === 3) {
-                //         index++;
-                //         break;
-                //     }
-
-                const pixelX =
-                    SobelKernals.x[0][0] * this.pixel(pixelData, x - 1, y - 1) +
-                    SobelKernals.x[0][1] * this.pixel(pixelData, x, y - 1) +
-                    SobelKernals.x[0][2] * this.pixel(pixelData, x + 1, y - 1) +
-                    SobelKernals.x[1][0] * this.pixel(pixelData, x - 1, y) +
-                    SobelKernals.x[1][1] * this.pixel(pixelData, x, y) +
-                    SobelKernals.x[1][2] * this.pixel(pixelData, x + 1, y) +
-                    SobelKernals.x[2][0] * this.pixel(pixelData, x - 1, y + 1) +
-                    SobelKernals.x[2][1] * this.pixel(pixelData, x, y + 1) +
-                    SobelKernals.x[2][2] * this.pixel(pixelData, x + 1, y + 1);
-
-                const pixelY =
-                    SobelKernals.y[0][0] * this.pixel(pixelData, x - 1, y - 1) +
-                    SobelKernals.y[0][1] * this.pixel(pixelData, x, y - 1) +
-                    SobelKernals.y[0][2] * this.pixel(pixelData, x + 1, y - 1) +
-                    SobelKernals.y[1][0] * this.pixel(pixelData, x - 1, y) +
-                    SobelKernals.y[1][1] * this.pixel(pixelData, x, y) +
-                    SobelKernals.y[1][2] * this.pixel(pixelData, x + 1, y) +
-                    SobelKernals.y[2][0] * this.pixel(pixelData, x - 1, y + 1) +
-                    SobelKernals.y[2][1] * this.pixel(pixelData, x, y + 1) +
-                    SobelKernals.y[2][2] * this.pixel(pixelData, x + 1, y + 1);
-
-                const magnitude = Math.sqrt(pixelX * pixelX + pixelY * pixelY) >>> 0;
-                pixelData[index] = magnitude;
-                pixelData[index + 1] = magnitude;
-                pixelData[index + 2] = magnitude;
-                pixelData[index + 3] = 255;
-                index += 4;
-                // }
-            }
-        }
-
-        console.log(index);
+    private scaleToRange(value: number, sourceMin = 0, sourceMax = 100, outputMin = 0, outputMax = 255): number {
+        return ((value - sourceMin) * (outputMax - outputMin)) / (sourceMax - sourceMin) + outputMin;
     }
 }
