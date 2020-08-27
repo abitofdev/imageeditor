@@ -11,7 +11,7 @@ export class EditorElement extends LitElement {
             #editor-container {
                 width: 100%;
                 height: 90%;
-                overflow: hidden;
+                overflow: scroll;
             }
         `;
     }
