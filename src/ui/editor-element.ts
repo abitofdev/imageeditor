@@ -47,6 +47,7 @@ export class EditorElement extends LitElement {
             <button @click="${this.drawClickHandler}">Draw</button>
             <button @click="${this.grayscaleClickHandler}">Grayscale</button>
             <button @click="${this.brightnessClickHandler}">Brightness</button>
+            <button @click="${this.contrastClickHandler}">Contrast</button>
             <button @click="${this.sobelClickHandler}">Sobel</button>
         `;
     }
@@ -65,7 +66,11 @@ export class EditorElement extends LitElement {
     }
 
     private brightnessClickHandler() {
-        this._imageEditor?.apply(Transformations.brightness(100));
+        this._imageEditor?.apply(Transformations.brightness(20));
+    }
+
+    private contrastClickHandler() {
+        this._imageEditor?.apply(Transformations.contrast(100));
     }
 
     private sobelClickHandler() {
