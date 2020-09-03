@@ -14,14 +14,12 @@ export class Sobel extends Effect {
 
     private readonly _threshold: number;
 
-    constructor(context: EffectContext, threshold: number = 0) {
-        super(context);
+    constructor(threshold: number = 0) {
+        super();
         this._threshold = this.scaleToRange(threshold, 0, 100, 0, 255);
     }
 
-    public manipulate(pixelData: Uint8ClampedArray): void {
-        const width = this.context.width;
-        const height = this.context.height;
+    public manipulate({ pixelData, width, height }: EffectContext): void {
         const originalPixelData = pixelData.slice(0);
 
         let i = 0;

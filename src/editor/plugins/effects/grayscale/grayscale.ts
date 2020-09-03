@@ -1,16 +1,16 @@
 import { Effect } from '../effect';
 import { EffectContext } from '../effect-context.interface';
+import { ColorSpace } from './color-space.enum';
 
 export class Grayscale extends Effect {
+    private readonly _colorSpace: ColorSpace;
 
-    private readonly _colorSpace: 'linear' | 'sRGB';
-
-    constructor(context: EffectContext, colorSpace: 'linear' | 'sRGB' = 'sRGB') {
-        super(context);        
+    constructor(colorSpace: ColorSpace) {
+        super();
         this._colorSpace = colorSpace;
     }
 
-    public manipulate(pixelData: Uint8ClampedArray): void {
+    public manipulate({ pixelData }: EffectContext): void {
         const length = pixelData.length;
 
         let r = 0;
@@ -22,12 +22,12 @@ export class Grayscale extends Effect {
             r = pixelData[x];
             g = pixelData[x + 1];
             b = pixelData[x + 2];
-            
-            switch(this._colorSpace) {
-                case 'linear': 
+
+            switch (this._colorSpace) {
+                case ColorSpace.Linear:
                     gray = (r + g + b) / 3;
                     break;
-                case 'sRGB':
+                case ColorSpace.SRGB:
                     gray = r * 0.3 + g * 0.59 + b * 0.11;
                     break;
                 default:

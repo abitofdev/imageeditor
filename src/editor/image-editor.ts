@@ -1,10 +1,10 @@
 import { IImageEditorConstructorOptions } from './image-editor-constructor-options.interface';
 import { fromEvent } from 'rxjs';
-import { takeUntil, map, filter } from 'rxjs/operators';
-import { IDisposable } from './shared/disposable.interace';
-import { Grayscale } from './plugins/effects/grayscale/grayscale';
+import { takeUntil, map, filter, pluck } from 'rxjs/operators';
+import { IDisposable } from './shared/disposable.interface';
 import { EffectContext } from './plugins/effects/effect-context.interface';
-import { Sobel } from './plugins/effects/sobel/sobel';
+import { Nullable } from '../global';
+import { ImageTransformation } from './shared/image-transformation';
 
 const defaultImageEditorConstructorOptions: IImageEditorConstructorOptions = {
     alpha: false
@@ -28,6 +28,7 @@ export class ImageEditor implements IDisposable {
         this._imageEditorOptions = { ...defaultImageEditorConstructorOptions, ...options };
 
         this._canvasElement = document.createElement('canvas');
+        this._canvasElement.setAttribute('style', 'position: absolute');
         this._hostElement.appendChild(this._canvasElement);
 
         this._renderingContext = this._canvasElement.getContext('2d', {
@@ -37,31 +38,52 @@ export class ImageEditor implements IDisposable {
 
     public loadImage(imageSource: string) {
         const image = new Image();
-        image.onload = () => {
+        image.onload = (e) => {
             this._canvasElement.width = image.width;
             this._canvasElement.height = image.height;
+
+            this._effectContext = {
+                width: image.width,
+                height: image.height
+            } as EffectContext;
+
             (this._renderingContext as any).drawImage(image, 0, 0);
         };
         image.src = imageSource;
     }
 
-    public grayscale() {
-        const imgWidth = this._canvasElement.width;
-        const imgHeight = this._canvasElement.height;
+    public apply(imageTransformation: ImageTransformation): ImageEditor {
+        if (this._effectContext) {
+            const id = this.getImageData();
+            const pixelData = id.data;
+            const test: EffectContext = {
+                width: this._effectContext.width,
+                height: this._effectContext.height,
+                pixelData: pixelData
+            };
 
-        const imageData = this._renderingContext?.getImageData(0, 0, imgWidth, imgHeight) as ImageData;
-        const pixelData = imageData.data;
-        console.log(pixelData.length);
+            for (let effect of imageTransformation.effects) {
+                effect.manipulate(test);
+            }
 
-        const effectContext: EffectContext = {
-            width: imgWidth,
-            height: imgHeight,
-        };
+            this._renderingContext?.putImageData(id, 0, 0);
+        }
+        return this;
+    }
 
-        new Grayscale(effectContext, 'linear').manipulate(pixelData);
-        new Sobel(effectContext).manipulate(pixelData);
+    private getImageData(): ImageData {
+        if (this._effectContext) {
+            const w = this._effectContext.width;
+            const h = this._effectContext.height;
+            return this._renderingContext?.getImageData(0, 0, w, h) as ImageData;
+        }
 
-        this._renderingContext?.putImageData(imageData, 0, 0);
+        throw new Error('image not loaded');
+    }
+
+    private _effectContext: Nullable<EffectContext>;
+    public get effectContext(): Nullable<EffectContext> {
+        return this._effectContext;
     }
 
     dispose() {}

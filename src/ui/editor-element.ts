@@ -3,6 +3,11 @@ import { Nullable } from '../global';
 import { fromEvent, Subject } from 'rxjs';
 import { takeUntil, debounceTime, startWith } from 'rxjs/operators';
 import { ImageEditor } from '../editor/image-editor';
+import { Grayscale } from '../editor/plugins/effects/grayscale/grayscale';
+import { Sobel } from '../editor/plugins/effects/sobel/sobel';
+import { Effect } from '../editor/plugins/effects/effect';
+import { Transformations } from '../editor/plugins/transformations';
+import { ColorSpace } from '../editor/plugins/effects/grayscale/color-space.enum';
 
 @customElement('editor-element')
 export class EditorElement extends LitElement {
@@ -12,6 +17,7 @@ export class EditorElement extends LitElement {
                 width: 100%;
                 height: 90%;
                 overflow: scroll;
+                position: relative;
             }
         `;
     }
@@ -37,16 +43,16 @@ export class EditorElement extends LitElement {
 
     render() {
         return html`
-            <div id="editor-container">
-            </div>
+            <div id="editor-container"></div>
             <button @click="${this.drawClickHandler}">Draw</button>
             <button @click="${this.grayscaleClickHandler}">Grayscale</button>
+            <button @click="${this.sobelClickHandler}">Sobel</button>
         `;
     }
 
     firstUpdated() {
         this._containerElement = this.shadowRoot?.querySelector('#editor-container') as HTMLDivElement;
-        this._imageEditor = new ImageEditor(this._containerElement);
+        this._imageEditor = new ImageEditor(this._containerElement, { alpha: true });
     }
 
     private drawClickHandler() {
@@ -54,7 +60,11 @@ export class EditorElement extends LitElement {
     }
 
     private grayscaleClickHandler() {
-        this._imageEditor?.grayscale();
+        this._imageEditor?.apply(Transformations.grayscale(ColorSpace.SRGB));
+    }
+
+    private sobelClickHandler() {
+        this._imageEditor?.apply(Transformations.sobel(75));
     }
 
     disconnectedCallback() {
